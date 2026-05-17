@@ -633,6 +633,8 @@ public class GameEngine
                     "List All Rooms with Monsters",
                     "View Most Dangerous Room",
                     "Player Inventory Audit",
+                    "All Locked Chests",
+                    "Total Room Floor Value",
 
                     // A tier
                     "Add Ability to Character",
@@ -661,6 +663,9 @@ public class GameEngine
             "Parser Demo (Stretch Goal)" => RunParserDemo(),
             "View Most Dangerous Room" => _adminService.MostDangerousRoom(),
             "Player Inventory Audit" => _adminService.InventoryAudit(),
+            "All Locked Chests" => _adminService.LockedTreasures(),
+            "Total Room Floor Value" => _adminService.FloorSweep(),
+ 
             _ => null
         };
 

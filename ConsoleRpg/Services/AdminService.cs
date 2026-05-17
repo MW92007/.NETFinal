@@ -104,7 +104,7 @@ public class AdminService
         foreach (var p in players)
         {
             table.AddRow(
-                Markup.Escape(p.Name),
+                Markup.Escape(p.Name ?? "(unknown)"),
                 p.Level.ToString(),
                 p.Health.ToString(),
                 Markup.Escape(p.CurrentRoom?.Name ?? "(nowhere)"));
@@ -164,12 +164,12 @@ public class AdminService
 
         var room = rooms.First(r => r.Name == pick);
 
-        AnsiConsole.MarkupLine($"\n[yellow bold]{Markup.Escape(room.Name)}[/]");
-        AnsiConsole.MarkupLine($"[dim]{Markup.Escape(room.Description)}[/]\n");
+        AnsiConsole.MarkupLine($"\n[yellow bold]{Markup.Escape(room.Name ?? "(unknown)")}[/]");
+        AnsiConsole.MarkupLine($"[dim]{Markup.Escape(room.Description ?? "")}[/]\n");
 
         var monsters = _context.Monsters.Where(m => m.CurrentRoomId == room.Id).ToList();
-        AnsiConsole.MarkupLine($"[red]Monsters:[/] {(monsters.Any() ? string.Join(", ", monsters.Select(m => Markup.Escape(m.Name))) : "[dim]none[/]")}");
-        AnsiConsole.MarkupLine($"[yellow]Items on the floor:[/] {(room.Items.Any() ? string.Join(", ", room.Items.Select(i => Markup.Escape(i.Name))) : "[dim]none[/]")}");
+        AnsiConsole.MarkupLine($"[red]Monsters:[/] {(monsters.Any() ? string.Join(", ", monsters.Select(m => Markup.Escape(m.Name ?? "(unknown)"))) : "[dim]none[/]")}");
+        AnsiConsole.MarkupLine($"[yellow]Items on the floor:[/] {(room.Items.Any() ? string.Join(", ", room.Items.Select(i => Markup.Escape(i.Name ?? "(unnamed)"))) : "[dim]none[/]")}");
 
         return ServiceResult.Ok($"Displayed details for {room.Name}.");
     }
@@ -200,7 +200,7 @@ public class AdminService
         foreach (var r in rooms)
         {
             var mc = monsterCounts.TryGetValue(r.Id, out var c) ? c : 0;
-            table.AddRow(Markup.Escape(r.Name), mc.ToString(), r.Items.Count.ToString());
+            table.AddRow(Markup.Escape(r.Name ?? "(unknown)"), mc.ToString(), r.Items.Count.ToString());
         }
 
         AnsiConsole.Write(table);
@@ -235,13 +235,13 @@ public class AdminService
             string location = item.Container?.ContainerType switch
             {
                 "Room" => $"on the floor of {((Room)item.Container).Name}",
-                "Chest" => $"inside chest \"{((Chest)item.Container).Description}\"",
+                "Chest" => $"inside chest \"{(((Chest)item.Container).Description) ?? "(chest)"}\"",
                 "Inventory" => "in a player's backpack",
                 "Equipment" => "equipped by a player",
                 "MonsterLoot" => "on a monster's corpse",
                 _ => "(unknown)"
             };
-            AnsiConsole.MarkupLine($"  [yellow]{Markup.Escape(item.Name)}[/] [dim]->[/] {Markup.Escape(location)}");
+            AnsiConsole.MarkupLine($"  [yellow]{Markup.Escape(item.Name ?? "(unnamed)")}[/] [dim]->[/] {Markup.Escape(location)}");
         }
 
         return ServiceResult.Ok($"Found {items.Count} match(es).");
@@ -297,16 +297,16 @@ public class AdminService
         var pick = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
                 .Title("[cyan]Which character?[/]")
-                .AddChoices(players.Select(p => p.Name).Append(CancelLabel)));
+                .AddChoices(players.Select(p => p.Name ?? "(unknown)").Append(CancelLabel)));
         if (pick == CancelLabel) return ServiceResult.Ok("Cancelled.");
         var player = players.First(p => p.Name == pick);
 
         if (!player.Abilities.Any())
-            return ServiceResult.Ok($"{player.Name} knows no abilities.");
+            return ServiceResult.Ok($"{Markup.Escape(player.Name ?? "(unknown)")} knows no abilities.");
 
-        AnsiConsole.MarkupLine($"\n[yellow bold]{Markup.Escape(player.Name)}[/]'s abilities:");
+        AnsiConsole.MarkupLine($"\n[yellow bold]{Markup.Escape(player.Name ?? "(unknown)")}[/]'s abilities:");
         foreach (var a in player.Abilities)
-            AnsiConsole.MarkupLine($"  - [cyan]{Markup.Escape(a.Name)}[/] ([dim]{Markup.Escape(a.Description)}[/])");
+            AnsiConsole.MarkupLine($"  - [cyan]{Markup.Escape(a.Name ?? "(unnamed)")}[/] ([dim]{Markup.Escape(a.Description ?? "")}[/])");
 
         return ServiceResult.Ok($"{player.Abilities.Count} abilities displayed.");
     }
@@ -341,7 +341,7 @@ public class AdminService
 
         foreach (var g in groups)
         {
-            table.AddRow(Markup.Escape(g.Type), g.Count.ToString(), g.Alive.ToString(), g.TotalHp.ToString());
+            table.AddRow(Markup.Escape(g.Type ?? "(unknown)"), g.Count.ToString(), g.Alive.ToString(), g.TotalHp.ToString());
         }
 
         AnsiConsole.Write(table);
@@ -378,10 +378,7 @@ public class AdminService
             .AddColumn("[yellow]Monsters[/]")
             .AddColumn("[yellow]Total Monster HP[/]");
 
-        table.AddRow(
-            Markup.Escape(room.Name),
-            dangerData.MonsterCount.ToString(),
-            dangerData.TotalHp.ToString());
+        table.AddRow(Markup.Escape(room.Name ?? "(unknown)"), dangerData.MonsterCount.ToString(), dangerData.TotalHp.ToString());
 
         AnsiConsole.Write(table);
 
@@ -411,7 +408,7 @@ public class AdminService
 
             foreach (var item in group)
             {
-                table.AddRow(Markup.Escape(item.Name));
+                table.AddRow(Markup.Escape(item.Name ?? "(unnamed)"));
             }
 
             AnsiConsole.Write(table);
@@ -421,4 +418,45 @@ public class AdminService
         return ServiceResult.Ok(
             $"Inventory audit complete. Found {groupedItems.Sum(g => g.Count())} items.");
     }
+
+    public ServiceResult LockedTreasures()
+    {
+        var lockedChests = _context.Containers
+            .OfType<Chest>()
+            .Where(c => c.IsLocked)
+            .ToList();
+
+        if (!lockedChests.Any())
+            return ServiceResult.Ok("No locked chests found.");
+
+        var table = new Table()
+            .Border(TableBorder.Rounded)
+            .AddColumn("[yellow]Locked Chest[/]")
+            .AddColumn("[yellow]Required Key[/]");
+
+        foreach (var chest in lockedChests)
+        {
+            table.AddRow(
+                Markup.Escape(chest.Description ?? "(chest)"),
+                Markup.Escape(chest.RequiredKeyId ?? "(none)")
+            );
+        }
+
+        AnsiConsole.Write(table);
+
+        return ServiceResult.Ok($"Found {lockedChests.Count} locked chest(s).");
+    }
+
+    public ServiceResult FloorSweep() { 
+        var totalGold = _context.Containers.OfType<Room>()
+        .Sum(room => room.Items
+        .Sum(item => item.Value));
+        
+        AnsiConsole.MarkupLine($"[yellow]Total gold on all floors:[/] {totalGold}"); 
+
+        return ServiceResult.Ok($"Floor sweep complete. Total gold: {totalGold}"); 
+    }
+
+    private static string Escape(string? value, string placeholder = "(unknown)") =>
+    Markup.Escape(value ?? placeholder);   
 }
