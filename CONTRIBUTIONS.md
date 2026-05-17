@@ -8,8 +8,7 @@
 
 ## 1. Starting Point
 
-[Tell me where you started: your own repo carried forward from W14, the W15
-template, or a hybrid?]
+I started at the WK15 template. We discussed this in class.
 
 > **Example:** *"I started from my own W14 repo and pulled MapManager.cs and
 > ExplorationUI.cs from the W15 template. My existing GameContext, models,
@@ -22,8 +21,15 @@ template, or a hybrid?]
 
 ## 2. What I Added
 
-[List the things YOU added on top of your starting point. For each, one
-sentence on what it does.]
+AdminService.MostDangerousRoom() - LINQ that gathers all of the rooms, reads how many monsters are in there, sums their HP, and then displays the top (first) room with the most HP.
+
+AdminService.InventoryAudit() - LINQ that aquires all available Item types and displays them in the tables they're founded in.
+
+AdminService.LockedTreasures() - LINQ that finds all chest types and displays them and their current states and what is required to unlock them if necessary.
+
+AdminService.FloorSweep() - LINQ that gathers all rooms, totals the Value of all items currenlty on the floor, and then returns it.
+
+Slime.cs - New Slime Enemy type that does compound damage, bounding as many times equal to the unique GelatinousBile characteristic.
 
 > **Example:**
 > - `AdminService.MostDangerousRoom()` — LINQ `GroupBy` on `Monster.CurrentRoomId`
@@ -37,8 +43,8 @@ sentence on what it does.]
 
 ## 3. What I Used From the Template / AI / Other Sources
 
-[Honest list. Using template code or AI assistance with attribution is fine.
-Pretending you wrote something you didn't is not.]
+Most of my program was Template code obviously. I had to use AI for bug fixing a lot, as mentioned in the video there was a point in which my character was dying
+before she even started the game. LockedTreasures in particular was one that I needed help with. There were many times wwhen my Migrations would break and I would go nuts trying to fix it, so there may be small changes littered around that went undocumented.
 
 > **Example:**
 > - `MapManager.cs`, `ExplorationUI.cs`: used as-is from the W15 template.
@@ -53,9 +59,8 @@ Pretending you wrote something you didn't is not.]
 
 ## 4. Reflection on This Project (one paragraph)
 
-[Hardest part of building YOUR W15 project specifically? What would you
-build NEXT on top of it if you had another week? Save the broader
-semester reflection for Section 5.]
+The hardest part of my project was just getting a grasp. For a while the concepts were very confusing and I was stubborn for not asking for help.
+A little late, but I think I'm starting to get the handle of how eveyrthing works. Especially with Migrations, trying to get my new Slime into the FinalWorldSeed was a pain in the butt. I think I got it in the end. For the future, I think I might work on this project in my free time. I was able to get a basic understanding of the LINQ through mimicry, but I think I could get it down with more practice. I tried to shoot for an A, but we'll see how this goes.
 
 > **Example:** *"The hardest part was figuring out why my Shop migration
 > kept breaking — I'd forgotten to add the discriminator value in
@@ -74,35 +79,28 @@ rather hear "week X was painful because Y" than diplomatic non-answers.
 Concrete > polite.
 
 **What did you learn that genuinely stuck with you?**
-[One specific concept or skill — be concrete. "TPH" is fine; "`OfType<T>()`
-finally clicked when I had to filter loot drops" is better.]
+I thought SOLID was interesting, I hadn't had to encounter it before so it was neat to watch it be explained practically.
 
 **What did you like about the course?**
-[Pacing, projects, format, in-class examples, READMEs, anything.]
+I liked the course in general. The templates are amazing, there's plenty of resources, it was very balanced.
 
 **What didn't work for you?**
-[What was confusing, slow, repetitive, or disconnected from the rest of
-the work? Be specific so I can actually fix it.]
+Just migrations, but I feel that that is more of a personal issue.
 
 **What surprised you?**
-[Something you expected to be easy but wasn't, or vice versa. Or a moment
-where a concept clicked unexpectedly.]
+LINQ by far. I still question why I get it wrong sometimes, it's oddly frustrating.
 
 **What was the hardest part of the semester (not just this project)?**
-[A particular week, concept, debugging session, or assignment. Why?]
+Getting a hold of the concepts as we went.
 
 **What would you ADD to next year's version?**
-[A topic, a tool, more practice on something, a guest speaker, anything.]
+I don't really know for sure.
 
 **What would you REMOVE or shorten?**
-[Anything that felt like filler, redundant, or off-topic from your
-perspective. Honest answers help — I literally rewrite the rubric and
-materials each year based on this section.]
+There wasn't anything that struck out as too much.
 
 **Anything else?**
-[Open-ended. Wins, frustrations, advice you'd give future students,
-requests, or just a sentence about your overall experience.]
-
+Nothing else from me, I hope you have a great summer!
 ---
 
 ## How this is graded
